@@ -1,0 +1,23 @@
+{
+  "slug": "MyPlugin",
+  "name": "Plugin name [MyPlugin]: My Plugin",
+  "version": "2.0.0",
+  "license": "License (if open-source, use license identifier from https://spdx.org/licenses/) [proprietary]: CC0-1.0",
+  "brand": "Brand (prefix for all module names) [My Plugin]:",
+  "author": "Author []: VCV",
+  "authorEmail": "Author email (optional) []: support@vcvrack.com",
+  "authorUrl": "Author website URL (optional) []: https://vcvrack.com/",
+  "pluginUrl": "Plugin website URL (optional) []:",
+  "manualUrl": "Manual website URL (optional) []:",
+  "sourceUrl": "Source code URL (optional) []:",
+  "donateUrl": "Donate URL (optional) []:",
+  "changelogUrl": "",
+  "modules": [
+    {
+      "slug": "MyModule",
+      "name": "n0153m",
+      "description": "test",
+      "tags": []
+    }
+  ]
+}
