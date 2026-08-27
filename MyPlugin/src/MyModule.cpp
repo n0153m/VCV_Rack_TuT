@@ -6,6 +6,15 @@
 
 struct MyModule : Module
  {
+	float phase = 0.0f;
+	float intPart = 0.0f;
+
+	float phase1 = 0.f;
+	float intPart1 = 0.f;
+
+	float lfo_phase = 0.f;
+	float lfo_intPart = 0.f;
+
 	enum ParamIds {
 		POT1,
 		POT2,
@@ -41,7 +50,76 @@ struct MyModule : Module
 	}
 
 	void process(const ProcessArgs& args) override {
+		//Get Pot's value -> Potentiometer
+	
+
+		// 1. params 是一個數組
+		// 2. params [POT2} 代表取數組裡面的元素](他是一個抽象物件，裡面很有多成員、組件)
+		// 3. params [POT2].getValue() 這個組件，裡面有函數成員叫
+		// 4. 將返回的旋鈕的值，賦予
+		// pitch += inputs[INPUT1].getVoltage();    
 		
+		// 根據 1V/Oct 標準計算頻率 (假設基礎頻率為 261.6256f 也就是中央 C)	
+		float pitch = params[POT1].getValue();
+		float lfo_pitch = params[POT2].getValue();
+		float pitch3 = params[POT3].getValue();
+		float freq = dsp::FREQ_C4 * std::pow(2.f, pitch);//pitch to frequence -> mtof
+		
+
+		//AM Amplitude Modulation
+		lfo_phase = lfo_phase + 20.f*lfo_pitch*args.sampleTime;
+		lfo_phase = std::modf(lfo_phase, &lfo_intPart);
+		float lfo = std::sin(2.f * M_PI * lfo_phase);
+
+		//FM Frequency Modulation
+		phase = phase + 200.f*pitch3*args.sampleTime;
+		phase = std::modf(phase, &intPart);
+		float fm = std::sin(2.f * M_PI * phase);
+
+		phase1 = phase1 + (freq+ fm*100) * args.sampleTime;
+		phase1 = std::modf(phase1, &intPart1);//take fractional parts
+		float sine = std::sin(2.f * M_PI * phase1);
+
+		outputs[OUTPUT1].setVoltage(phase1);
+		outputs[OUTPUT2].setVoltage(sine);
+		outputs[OUTPUT3].setVoltage(sine*lfo);
+		//更新 phase
+		// phase += freq * args.sampleTime;
+		// if (phase >= 1.0f) {
+			// phase -= 1.0f;
+		// }
+
+		// 2.Fourier series(additive synthesis) to generate waveforms
+		// /float sawtooth = 0.0f;
+		// float triangle = 0.0f;
+		// float rectangle = 0.0f;
+
+		// constexpr int NUM_HARMONICS =15;
+
+		// for(int n=1; n<=NUM_HARMONICS; ++n){
+		// 	float harmoniPhase =2.f*M_PI*phase*n;
+		// 	float sinVal = std::sin(harmoniPhase);
+
+			//Sawtooth wave: Fourier series for sawtooth wave is given by the sum of sine waves with decreasing amplitude.
+			// sawtooth += sinVal/n;
+
+			//Rectangle wave: Fourier series for rectangle wave is given by the sum of odd harmonics with decreasing amplitude.
+			//Triangle wave: Fourier series for triangle wave is given by the sum of odd harmonics with decreasing amplitude, but with alternating signs.
+		// 	if(n%2 != 0){
+		// 		rectangle += sinVal/n;
+		// 		float sign = (((n-1)/2)%2 == 0) ? 1.f : -1.f;
+		// 		triangle += sign*sinVal/(n*n);
+		// 	}
+		// }
+
+		// sawtooth *= (2.0f /M_PI);
+		// rectangle *= (4.0f /M_PI);
+		// triangle *= (8.0f / (M_PI*M_PI));
+
+		// 3.輸出電壓
+		// outputs[MyModule::OUTPUT1].setVoltage(sawtooth*5.0f); // Scale to 5V peak
+		// outputs[MyModule::OUTPUT2].setVoltage(triangle*5.0f); // Scale to 5V peak
+		// outputs[MyModule::OUTPUT3].setVoltage(rectangle*5.0f); // Scale to 5V peak
 	}
 };
 
